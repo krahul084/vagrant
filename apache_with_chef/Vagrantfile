@@ -1,0 +1,8 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "hashicorp/precise64"
+  config.vm.hostname = "myhost"
+  config.vm.network "private_network", type: "dhcp"
+  config.vm.provision "chef_solo" do |chef|
+      chef.add_recipe "vagrant_la"
+end
+end
