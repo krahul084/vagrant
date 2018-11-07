@@ -1,0 +1,68 @@
+Vagrant.configure("2") do |config|
+    config.vm.define "control" do |control|
+	  control.vm.box = "centos/7"
+	  control.vm.hostname = "ControlServer"
+	  control.vm.network "private_network", ip: "192.168.10.11"
+	  control.vm.provision  "ansible" do |ansible|
+        ansible.playbook = "setup_ansible.yml"
+      end
+    end
+
+    config.vm.define "vm1" do |vm1|
+	  vm1.vm.box = "centos/7"
+	  vm1.vm.hostname = "vm1"
+	  vm1.vm.network "private_network", ip: "192.168.10.12"
+	  vm1.vm.provider "virtualbox" do |v|
+	      v.name = "vm1"
+	      v.memory = 2048
+	      v.cpus = 2
+	      file_to_disk = "mydisk1.vmdk"
+	      unless File.exist?(file_to_disk)
+	          v.customize [ "createmedium", "disk", "--filename", file_to_disk, "--format", "vmdk", "--size", 1024 * 10 ]
+	      end
+	      v.customize [ "storageattach", :id, "--storagectl", "IDE", "--port", "1", "--device", "0", "--type", "hdd", "--medium", file_to_disk]
+	   end
+	  vm1.vm.provision  "ansible" do |ansible|
+        ansible.playbook = "setup_ansible.yml"
+      end
+    end
+
+    config.vm.define "vm2" do |vm2|
+	  vm2.vm.box = "centos/7"
+	  vm2.vm.hostname = "vm2"
+	  vm2.vm.network "private_network", ip: "192.168.10.13"
+	  	  vm2.vm.provider "virtualbox" do |v|
+	      v.name = "vm2"
+	      v.memory = 2048
+	      v.cpus = 2
+	      file_to_disk = "mydisk2.vmdk"
+	      unless File.exist?(file_to_disk)
+	          v.customize [ "createmedium", "disk", "--filename", file_to_disk, "--format", "vmdk", "--size", 1024 * 10 ]
+	      end
+	      v.customize [ "storageattach", :id, "--storagectl", "IDE", "--port", "1", "--device", "0", "--type", "hdd", "--medium", file_to_disk]
+	   end
+	  vm2.vm.provision  "ansible" do |ansible|
+        ansible.playbook = "setup_ansible.yml"
+      end
+    end
+
+
+    config.vm.define "vm3" do |vm3|
+	  vm3.vm.box = "centos/7"
+	  vm3.vm.hostname = "vm3"
+	  vm3.vm.network "private_network", ip: "192.168.10.14"
+	  	  vm3.vm.provider "virtualbox" do |v|
+	      v.name = "vm3"
+	      v.memory = 2048
+	      v.cpus = 2
+	      file_to_disk = "mydisk3.vmdk"
+	      unless File.exist?(file_to_disk)
+	          v.customize [ "createmedium", "disk", "--filename", file_to_disk, "--format", "vmdk", "--size", 1024 * 10 ]
+	      end
+	      v.customize [ "storageattach", :id, "--storagectl", "IDE", "--port", "1", "--device", "0", "--type", "hdd", "--medium", file_to_disk]
+	   end
+	  vm3.vm.provision  "ansible" do |ansible|
+        ansible.playbook = "setup_ansible.yml"
+      end
+    end
+end

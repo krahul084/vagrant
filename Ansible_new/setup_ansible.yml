@@ -1,0 +1,63 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: yes
+  tasks:
+
+  - name: Install Ansible related packages
+    yum:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+      - epel-release
+      - ansible
+    when: ansible_hostname == "ControlServer"
+
+  - name: Create Ansible user with sudo access
+    user: 
+      name: ansible
+      groups: wheel
+      shell: /bin/bash
+
+
+  - name: Generate ssh key for control server
+    user:
+      name: ansible
+      generate_ssh_key: yes
+      ssh_key_file: .ssh/id_rsa
+    when: ansible_hostname == "ControlServer"
+    register: pub_key
+
+  - name: Copy authorized keys file to local
+    copy: 
+      content: "{{ pub_key.ssh_public_key }}"
+      dest: "{{ playbook_dir }}/authorized_keys"
+    delegate_to: localhost
+    become_user: "krahul"
+    when: ansible_hostname == "ControlServer"
+
+  - name: Make sure .ssh directory exists
+    file:
+       path: /home/ansible/.ssh
+       state: directory
+       mode: 0700
+       owner: ansible
+       group: ansible
+
+  - name: Setup authorized keys
+    copy: 
+      src: authorized_keys
+      dest: /home/ansible/.ssh/authorized_keys
+      mode: 0400
+      owner: ansible
+      group: ansible
+      
+
+  - name: Setup passwordless sudo 
+    lineinfile:
+       path: /etc/sudoers
+       state: present
+       regexp: '^%wheel\s'
+       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+...
